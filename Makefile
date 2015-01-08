@@ -49,6 +49,7 @@ SHLIB_CFLAGS ?= -shared
 INSTALL      = install
 INSTALL_DIR  = $(INSTALL) -d -m0755 -p
 INSTALL_DATA = $(INSTALL) -m0644 -p
+INSTALL_PROG = $(INSTALL) -m0755 -p
 
 LIBXENAPI_HDRS = $(wildcard include/*.h)
 LIBXENAPI_OBJS = $(patsubst %.c, %.o, $(wildcard src/*.c))
@@ -84,7 +85,7 @@ install: all
 	$(INSTALL_PROG) libxenserver.so.$(MAJOR).$(MINOR) $(DESTDIR)/usr/$(LIBDIR)
 	ln -sf libxenserver.so.$(MAJOR).$(MINOR) $(DESTDIR)/usr/$(LIBDIR)/libxenserver.so.$(MAJOR)
 	ln -sf libxenserver.so.$(MAJOR) $(DESTDIR)/usr/$(LIBDIR)/libxenserver.so
-	$(INSTALL_DATA) libxenserver.a $(DESTDIR)/usr/$(LIBDIR)
+#	$(INSTALL_DATA) libxenserver.a $(DESTDIR)/usr/$(LIBDIR)
 	for i in $(LIBXENAPI_HDRS); do \
 	    $(INSTALL_DATA) $$i $(DESTDIR)/usr/include/xen/api; \
 	done
