@@ -51,7 +51,7 @@ INSTALL_DIR  = $(INSTALL) -d -m0755 -p
 INSTALL_DATA = $(INSTALL) -m0644 -p
 INSTALL_PROG = $(INSTALL) -m0755 -p
 
-LIBXENAPI_HDRS = $(wildcard include/*.h)
+LIBXENAPI_HDRS = $(wildcard include/xen/api/*.h)
 LIBXENAPI_OBJS = $(patsubst %.c, %.o, $(wildcard src/*.c))
 
 TEST_PROGRAMS = test/test_vm_ops test/test_event_handling \
