@@ -327,7 +327,7 @@ int main(int argc, char **argv)
                                         target_hosts->contents[0], options );
             
             idx++;
-            printf(" Migrating VM %d \n", i);
+            printf(" Migrating VM %zd \n", i);
         }
     
     }
@@ -390,7 +390,7 @@ int main(int argc, char **argv)
                         printf("Failed while trying to migrate VM: \n");
                         for(size_t k=0; k<error_msgs->size; k++)
                         {
-                            printf("error_msg %u : %s \n",  k, error_msgs->contents[k]); 
+                            printf("error_msg %zd : %s \n",  k, error_msgs->contents[k]); 
                         }
                     }
                 }
