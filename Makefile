@@ -29,6 +29,7 @@
 #
 
 DESTDIR=/usr/local
+LIBDIR=lib
 
 ifeq ($(CYGWIN), 1)
 	CYGWIN_LIBXML = -L/bin -lxml2-2
@@ -87,17 +88,17 @@ $(TEST_PROGRAMS): test/%: test/%.o libxenserver.so
 
 .PHONY: install
 install: all libxenserver.a
-	$(INSTALL_DIR) $(DESTDIR)/include/xen/api
-	$(INSTALL_DIR) $(DESTDIR)/lib
-	$(INSTALL_DATA) libxenserver.so.2.3 $(DESTDIR)/lib
-	ln -sf libxenserver.so.2.3 $(DESTDIR)/lib/libxenserver.so.2
-	ln -sf libxenserver.so.2 $(DESTDIR)/lib/libxenserver.so
-	$(INSTALL_DATA) libxenserver.a $(DESTDIR)/lib
+	$(INSTALL_DIR) $(DESTDIR)/usr/include/xen/api
+	$(INSTALL_DIR) $(DESTDIR)/usr/$(LIBDIR)
+	$(INSTALL_DATA) libxenserver.so.2.3 $(DESTDIR)/usr/$(LIBDIR)
+	ln -sf libxenserver.so.2.3 $(DESTDIR)/usr/$(LIBDIR)/libxenserver.so.2
+	ln -sf libxenserver.so.2 $(DESTDIR)/usr/$(LIBDIR)/libxenserver.so
+	$(INSTALL_DATA) libxenserver.a $(DESTDIR)/usr/$(LIBDIR)
 	for i in $(LIBXENAPI_HDRS_INT); do \
-	    $(INSTALL_DATA) $$i $(DESTDIR)/include/; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)/usr/include/; \
 	done
 	for i in $(LIBXENAPI_HDRS); do \
-	    $(INSTALL_DATA) $$i $(DESTDIR)/include/xen/api; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)/usr/include/xen/api; \
 	done
 
 
