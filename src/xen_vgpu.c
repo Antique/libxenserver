@@ -36,8 +36,10 @@
 #include "xen_internal.h"
 #include <xen/api/xen_common.h>
 #include <xen/api/xen_gpu_group.h>
+#include <xen/api/xen_pgpu.h>
 #include <xen/api/xen_string_string_map.h>
 #include <xen/api/xen_vgpu.h>
+#include <xen/api/xen_vgpu_type.h>
 #include <xen/api/xen_vgpu_xen_vgpu_record_map.h>
 #include <xen/api/xen_vm.h>
 
@@ -70,7 +72,13 @@ static const struct_member xen_vgpu_record_struct_members[] =
           .offset = offsetof(xen_vgpu_record, currently_attached) },
         { .key = "other_config",
           .type = &abstract_type_string_string_map,
-          .offset = offsetof(xen_vgpu_record, other_config) }
+          .offset = offsetof(xen_vgpu_record, other_config) },
+        { .key = "type",
+          .type = &abstract_type_ref,
+          .offset = offsetof(xen_vgpu_record, type) },
+        { .key = "resident_on",
+          .type = &abstract_type_ref,
+          .offset = offsetof(xen_vgpu_record, resident_on) }
     };
 
 const abstract_type xen_vgpu_record_abstract_type_ =
@@ -116,6 +124,8 @@ xen_vgpu_record_free(xen_vgpu_record *record)
     xen_gpu_group_record_opt_free(record->gpu_group);
     free(record->device);
     xen_string_string_map_free(record->other_config);
+    xen_vgpu_type_record_opt_free(record->type);
+    xen_pgpu_record_opt_free(record->resident_on);
     free(record);
 }
 
@@ -245,6 +255,40 @@ xen_vgpu_get_other_config(xen_session *session, xen_string_string_map **result, 
 
 
 bool
+xen_vgpu_get_type(xen_session *session, xen_vgpu_type *result, xen_vgpu vgpu)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = vgpu }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("VGPU.get_type");
+    return session->ok;
+}
+
+
+bool
+xen_vgpu_get_resident_on(xen_session *session, xen_pgpu *result, xen_vgpu vgpu)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = vgpu }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("VGPU.get_resident_on");
+    return session->ok;
+}
+
+
+bool
 xen_vgpu_set_other_config(xen_session *session, xen_vgpu vgpu, xen_string_string_map *other_config)
 {
     abstract_value param_values[] =
@@ -295,7 +339,7 @@ xen_vgpu_remove_from_other_config(xen_session *session, xen_vgpu vgpu, char *key
 
 
 bool
-xen_vgpu_create(xen_session *session, xen_vgpu *result, xen_vm vm, xen_gpu_group gpu_group, char *device, xen_string_string_map *other_config)
+xen_vgpu_create(xen_session *session, xen_vgpu *result, xen_vm vm, xen_gpu_group gpu_group, char *device, xen_string_string_map *other_config, xen_vgpu_type type)
 {
     abstract_value param_values[] =
         {
@@ -306,7 +350,9 @@ xen_vgpu_create(xen_session *session, xen_vgpu *result, xen_vm vm, xen_gpu_group
             { .type = &abstract_type_string,
               .u.string_val = device },
             { .type = &abstract_type_string_string_map,
-              .u.set_val = (arbitrary_set *)other_config }
+              .u.set_val = (arbitrary_set *)other_config },
+            { .type = &abstract_type_string,
+              .u.string_val = type }
         };
 
     abstract_type result_type = abstract_type_string;
@@ -317,7 +363,7 @@ xen_vgpu_create(xen_session *session, xen_vgpu *result, xen_vm vm, xen_gpu_group
 }
 
 bool
-xen_vgpu_create_async(xen_session *session, xen_task *result, xen_vm vm, xen_gpu_group gpu_group, char *device, xen_string_string_map *other_config)
+xen_vgpu_create_async(xen_session *session, xen_task *result, xen_vm vm, xen_gpu_group gpu_group, char *device, xen_string_string_map *other_config, xen_vgpu_type type)
 {
     abstract_value param_values[] =
         {
@@ -328,7 +374,9 @@ xen_vgpu_create_async(xen_session *session, xen_task *result, xen_vm vm, xen_gpu
             { .type = &abstract_type_string,
               .u.string_val = device },
             { .type = &abstract_type_string_string_map,
-              .u.set_val = (arbitrary_set *)other_config }
+              .u.set_val = (arbitrary_set *)other_config },
+            { .type = &abstract_type_string,
+              .u.string_val = type }
         };
 
     abstract_type result_type = abstract_type_string;

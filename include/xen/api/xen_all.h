@@ -2,6 +2,7 @@
 #ifndef XEN_API_XEN_ALL_H
 #define XEN_API_XEN_ALL_H
 #include <xen/api/xen_after_apply_guidance.h>
+#include <xen/api/xen_allocation_algorithm.h>
 #include <xen/api/xen_api_failure.h>
 #include <xen/api/xen_auth.h>
 #include <xen/api/xen_blob.h>
@@ -109,6 +110,9 @@
 #include <xen/api/xen_vdi_type.h>
 #include <xen/api/xen_vdi_xen_vdi_record_map.h>
 #include <xen/api/xen_vgpu.h>
+#include <xen/api/xen_vgpu_type.h>
+#include <xen/api/xen_vgpu_type_int_map.h>
+#include <xen/api/xen_vgpu_type_xen_vgpu_type_record_map.h>
 #include <xen/api/xen_vgpu_xen_vgpu_record_map.h>
 #include <xen/api/xen_vif.h>
 #include <xen/api/xen_vif_locking_mode.h>
@@ -116,6 +120,7 @@
 #include <xen/api/xen_vif_metrics_xen_vif_metrics_record_map.h>
 #include <xen/api/xen_vif_network_map.h>
 #include <xen/api/xen_vif_operations.h>
+#include <xen/api/xen_vif_string_map.h>
 #include <xen/api/xen_vif_xen_vif_record_map.h>
 #include <xen/api/xen_vlan.h>
 #include <xen/api/xen_vlan_xen_vlan_record_map.h>

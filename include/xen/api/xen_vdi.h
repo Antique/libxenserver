@@ -665,18 +665,18 @@ xen_vdi_update_async(xen_session *session, xen_task *result, xen_vdi vdi);
 
 
 /**
- * Make a fresh VDI in the specified SR and copy the supplied VDI's
- * data to the new disk.
+ * Copy either a full VDI or the block differences between two VDIs
+ * into either a fresh VDI or an existing VDI.
  */
 extern bool
-xen_vdi_copy(xen_session *session, xen_vdi *result, xen_vdi vdi, xen_sr sr);
+xen_vdi_copy(xen_session *session, xen_vdi *result, xen_vdi vdi, xen_sr sr, xen_vdi base_vdi, xen_vdi into_vdi);
 
 /**
- * Make a fresh VDI in the specified SR and copy the supplied VDI's
- * data to the new disk.
+ * Copy either a full VDI or the block differences between two VDIs
+ * into either a fresh VDI or an existing VDI.
  */
 extern bool
-xen_vdi_copy_async(xen_session *session, xen_task *result, xen_vdi vdi, xen_sr sr);
+xen_vdi_copy_async(xen_session *session, xen_task *result, xen_vdi vdi, xen_sr sr, xen_vdi base_vdi, xen_vdi into_vdi);
 
 
 /**

@@ -45,6 +45,7 @@
 #include <xen/api/xen_string_string_map.h>
 #include <xen/api/xen_task_decl.h>
 #include <xen/api/xen_vif_decl.h>
+#include <xen/api/xen_vif_string_map.h>
 
 
 /*
@@ -98,6 +99,7 @@ typedef struct xen_network_record
     xen_string_blob_map *blobs;
     struct xen_string_set *tags;
     enum xen_network_default_locking_mode default_locking_mode;
+    xen_vif_string_map *assigned_ips;
 } xen_network_record;
 
 /**
@@ -315,6 +317,13 @@ xen_network_get_tags(xen_session *session, struct xen_string_set **result, xen_n
  */
 extern bool
 xen_network_get_default_locking_mode(xen_session *session, enum xen_network_default_locking_mode *result, xen_network network);
+
+
+/**
+ * Get the assigned_ips field of the given network.
+ */
+extern bool
+xen_network_get_assigned_ips(xen_session *session, xen_vif_string_map **result, xen_network network);
 
 
 /**

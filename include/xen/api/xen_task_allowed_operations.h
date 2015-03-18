@@ -44,6 +44,11 @@ enum xen_task_allowed_operations
     XEN_TASK_ALLOWED_OPERATIONS_CANCEL,
 
     /**
+     * refers to the operation "destroy"
+     */
+    XEN_TASK_ALLOWED_OPERATIONS_DESTROY,
+
+    /**
      * Unknown to this version of the bindings.
      */
     XEN_TASK_ALLOWED_OPERATIONS_UNDEFINED

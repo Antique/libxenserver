@@ -75,7 +75,13 @@ static const struct_member xen_pci_record_struct_members[] =
           .offset = offsetof(xen_pci_record, dependencies) },
         { .key = "other_config",
           .type = &abstract_type_string_string_map,
-          .offset = offsetof(xen_pci_record, other_config) }
+          .offset = offsetof(xen_pci_record, other_config) },
+        { .key = "subsystem_vendor_name",
+          .type = &abstract_type_string,
+          .offset = offsetof(xen_pci_record, subsystem_vendor_name) },
+        { .key = "subsystem_device_name",
+          .type = &abstract_type_string,
+          .offset = offsetof(xen_pci_record, subsystem_device_name) }
     };
 
 const abstract_type xen_pci_record_abstract_type_ =
@@ -124,6 +130,8 @@ xen_pci_record_free(xen_pci_record *record)
     free(record->pci_id);
     xen_pci_record_opt_set_free(record->dependencies);
     xen_string_string_map_free(record->other_config);
+    free(record->subsystem_vendor_name);
+    free(record->subsystem_device_name);
     free(record);
 }
 
@@ -283,6 +291,40 @@ xen_pci_get_other_config(xen_session *session, xen_string_string_map **result, x
 
     *result = NULL;
     XEN_CALL_("PCI.get_other_config");
+    return session->ok;
+}
+
+
+bool
+xen_pci_get_subsystem_vendor_name(xen_session *session, char **result, xen_pci pci)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = pci }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("PCI.get_subsystem_vendor_name");
+    return session->ok;
+}
+
+
+bool
+xen_pci_get_subsystem_device_name(xen_session *session, char **result, xen_pci pci)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = pci }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("PCI.get_subsystem_device_name");
     return session->ok;
 }
 

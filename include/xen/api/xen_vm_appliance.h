@@ -33,6 +33,7 @@
 #define XEN_VM_APPLIANCE_H
 
 #include <xen/api/xen_common.h>
+#include <xen/api/xen_sr_decl.h>
 #include <xen/api/xen_string_vm_appliance_operation_map.h>
 #include <xen/api/xen_task_decl.h>
 #include <xen/api/xen_vm_appliance_decl.h>
@@ -337,6 +338,19 @@ xen_vm_appliance_assert_can_be_recovered(xen_session *session, xen_vm_appliance 
  */
 extern bool
 xen_vm_appliance_assert_can_be_recovered_async(xen_session *session, xen_task *result, xen_vm_appliance self, xen_session *session_to);
+
+
+/**
+ * Get the list of SRs required by the VM appliance to recover.
+ */
+extern bool
+xen_vm_appliance_get_srs_required_for_recovery(xen_session *session, struct xen_sr_set **result, xen_vm_appliance self, xen_session *session_to);
+
+/**
+ * Get the list of SRs required by the VM appliance to recover.
+ */
+extern bool
+xen_vm_appliance_get_srs_required_for_recovery_async(xen_session *session, xen_task *result, xen_vm_appliance self, xen_session *session_to);
 
 
 /**

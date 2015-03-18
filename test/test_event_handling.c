@@ -39,7 +39,6 @@
 #include <curl/curl.h>
 #include <xen/api/xen_all.h>
 
-//#define PRINT_XML
 
 static void usage()
 {

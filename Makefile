@@ -28,66 +28,76 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-MAJOR = 2
-MINOR = 0
+DESTDIR=/usr/local
 
-CFLAGS = -g -Iinclude                     \
+ifeq ($(CYGWIN), 1)
+	CYGWIN_LIBXML = -L/bin -lxml2-2
+	CYGWIN_CURL = -L/bin -lcurl-4
+	POS_FLAG = -U__STRICT_ANSI__
+	TEST_LDFLAGS = -L . libxenserver.so $(CYGWIN_CURL)
+else
+	POS_FLAG = -fPIC
+	TEST_LDFLAGS = -L . -lxenserver
+endif
+
+CFLAGS = -g -Iinclude \
          $(shell xml2-config --cflags) \
          $(shell curl-config --cflags) \
-         -W -Wall -Wmissing-prototypes -Werror -std=c99 -fPIC
+         -W -Wall -Wmissing-prototypes -Werror -std=c99 $(POS_FLAG)
 
 LDFLAGS = -g $(shell xml2-config --libs) \
-          $(shell curl-config --libs) \
-	  -Wl,-rpath,$(shell pwd)
+             $(shell curl-config --libs) \
+          -Wl,-rpath,$(shell pwd) $(CYGWIN_LIBXML)
 
 # -h for Solaris
 SONAME_LDFLAG ?= -soname
-# -R /usr/sfw/$(LIBDIR) -shared for Solaris
+# -R /usr/sfw/lib -shared for Solaris
 SHLIB_CFLAGS ?= -shared
 
 # ginstall for Solaris
-INSTALL      = install
-INSTALL_DIR  = $(INSTALL) -d -m0755 -p
-INSTALL_DATA = $(INSTALL) -m0644 -p
-INSTALL_PROG = $(INSTALL) -m0755 -p
+INSTALL_DIR  = install -d -m0755 -p
+INSTALL_DATA = install -m0644 -p
 
+LIBXENAPI_HDRS_INT = $(wildcard include/*.h)
 LIBXENAPI_HDRS = $(wildcard include/xen/api/*.h)
 LIBXENAPI_OBJS = $(patsubst %.c, %.o, $(wildcard src/*.c))
 
-TEST_PROGRAMS = test/test_vm_ops test/test_event_handling \
-                test/test_failures test/test_vm_async_migrate
+TEST_PROGRAMS = $(patsubst %.c, %, $(wildcard test/*.c))
 
-TARBALL_DEST = libxenserver-$(MAJOR).$(MINOR)
+TARBALL_DEST = libxenserver-2.3
 
 .PHONY: all
 all: $(TEST_PROGRAMS)
 
-libxenserver.so: libxenserver.so.$(MAJOR)
+libxenserver.so: libxenserver.so.2
 	ln -sf $< $@
 
-libxenserver.so.$(MAJOR): libxenserver.so.$(MAJOR).$(MINOR)
+libxenserver.so.2: libxenserver.so.2.3
 	ln -sf $< $@
 
-libxenserver.so.$(MAJOR).$(MINOR): $(LIBXENAPI_OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,$(SONAME_LDFLAG) -Wl,libxenserver.so.$(MAJOR) $(SHLIB_CFLAGS) -o $@ $^
+libxenserver.so.2.3: $(LIBXENAPI_OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,$(SONAME_LDFLAG) -Wl,libxenserver.so.2 $(SHLIB_CFLAGS) -o $@ $^
 
 libxenserver.a: $(LIBXENAPI_OBJS)
 	$(AR) rcs libxenserver.a $^
 
 $(TEST_PROGRAMS): test/%: test/%.o libxenserver.so
-	$(CC) -o $@ $< -L . -lxenserver $(LDFLAGS)
+	$(CC) -o $@ $< $(TEST_LDFLAGS) $(LDFLAGS)
 
 
 .PHONY: install
-install: all
-	$(INSTALL_DIR) $(DESTDIR)/usr/include/xen/api
-	$(INSTALL_DIR) $(DESTDIR)/usr/$(LIBDIR)
-	$(INSTALL_PROG) libxenserver.so.$(MAJOR).$(MINOR) $(DESTDIR)/usr/$(LIBDIR)
-	ln -sf libxenserver.so.$(MAJOR).$(MINOR) $(DESTDIR)/usr/$(LIBDIR)/libxenserver.so.$(MAJOR)
-	ln -sf libxenserver.so.$(MAJOR) $(DESTDIR)/usr/$(LIBDIR)/libxenserver.so
-#	$(INSTALL_DATA) libxenserver.a $(DESTDIR)/usr/$(LIBDIR)
+install: all libxenserver.a
+	$(INSTALL_DIR) $(DESTDIR)/include/xen/api
+	$(INSTALL_DIR) $(DESTDIR)/lib
+	$(INSTALL_DATA) libxenserver.so.2.3 $(DESTDIR)/lib
+	ln -sf libxenserver.so.2.3 $(DESTDIR)/lib/libxenserver.so.2
+	ln -sf libxenserver.so.2 $(DESTDIR)/lib/libxenserver.so
+	$(INSTALL_DATA) libxenserver.a $(DESTDIR)/lib
+	for i in $(LIBXENAPI_HDRS_INT); do \
+	    $(INSTALL_DATA) $$i $(DESTDIR)/include/; \
+	done
 	for i in $(LIBXENAPI_HDRS); do \
-	    $(INSTALL_DATA) $$i $(DESTDIR)/usr/include/xen/api; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)/include/xen/api; \
 	done
 
 
@@ -112,10 +122,13 @@ $(TARBALL_DEST).tar.bz2: all
 
 
 .PHONY: clean
-clean:
+clean: cleantests
 	rm -f `find -name *.o`
 	rm -f libxenserver.so*
 	rm -f libxenserver.a
+
+.PHONY: cleantests
+cleantests:
 	rm -f $(TEST_PROGRAMS)
 
 

@@ -33,6 +33,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "xen_allocation_algorithm_internal.h"
 #include "xen_internal.h"
 #include <xen/api/xen_common.h>
 #include <xen/api/xen_gpu_group.h>
@@ -40,6 +41,7 @@
 #include <xen/api/xen_pgpu.h>
 #include <xen/api/xen_string_string_map.h>
 #include <xen/api/xen_vgpu.h>
+#include <xen/api/xen_vgpu_type.h>
 
 
 XEN_FREE(xen_gpu_group)
@@ -73,7 +75,16 @@ static const struct_member xen_gpu_group_record_struct_members[] =
           .offset = offsetof(xen_gpu_group_record, gpu_types) },
         { .key = "other_config",
           .type = &abstract_type_string_string_map,
-          .offset = offsetof(xen_gpu_group_record, other_config) }
+          .offset = offsetof(xen_gpu_group_record, other_config) },
+        { .key = "allocation_algorithm",
+          .type = &xen_allocation_algorithm_abstract_type_,
+          .offset = offsetof(xen_gpu_group_record, allocation_algorithm) },
+        { .key = "supported_VGPU_types",
+          .type = &abstract_type_ref_set,
+          .offset = offsetof(xen_gpu_group_record, supported_vgpu_types) },
+        { .key = "enabled_VGPU_types",
+          .type = &abstract_type_ref_set,
+          .offset = offsetof(xen_gpu_group_record, enabled_vgpu_types) }
     };
 
 const abstract_type xen_gpu_group_record_abstract_type_ =
@@ -121,6 +132,8 @@ xen_gpu_group_record_free(xen_gpu_group_record *record)
     xen_vgpu_record_opt_set_free(record->vgpus);
     xen_string_set_free(record->gpu_types);
     xen_string_string_map_free(record->other_config);
+    xen_vgpu_type_record_opt_set_free(record->supported_vgpu_types);
+    xen_vgpu_type_record_opt_set_free(record->enabled_vgpu_types);
     free(record);
 }
 
@@ -285,6 +298,55 @@ xen_gpu_group_get_other_config(xen_session *session, xen_string_string_map **res
 
 
 bool
+xen_gpu_group_get_allocation_algorithm(xen_session *session, enum xen_allocation_algorithm *result, xen_gpu_group gpu_group)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = gpu_group }
+        };
+
+    abstract_type result_type = xen_allocation_algorithm_abstract_type_;
+    XEN_CALL_("GPU_group.get_allocation_algorithm");
+    return session->ok;
+}
+
+
+bool
+xen_gpu_group_get_supported_vgpu_types(xen_session *session, struct xen_vgpu_type_set **result, xen_gpu_group gpu_group)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = gpu_group }
+        };
+
+    abstract_type result_type = abstract_type_string_set;
+
+    *result = NULL;
+    XEN_CALL_("GPU_group.get_supported_VGPU_types");
+    return session->ok;
+}
+
+
+bool
+xen_gpu_group_get_enabled_vgpu_types(xen_session *session, struct xen_vgpu_type_set **result, xen_gpu_group gpu_group)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = gpu_group }
+        };
+
+    abstract_type result_type = abstract_type_string_set;
+
+    *result = NULL;
+    XEN_CALL_("GPU_group.get_enabled_VGPU_types");
+    return session->ok;
+}
+
+
+bool
 xen_gpu_group_set_name_label(xen_session *session, xen_gpu_group gpu_group, char *label)
 {
     abstract_value param_values[] =
@@ -365,6 +427,126 @@ xen_gpu_group_remove_from_other_config(xen_session *session, xen_gpu_group gpu_g
     return session->ok;
 }
 
+
+bool
+xen_gpu_group_set_allocation_algorithm(xen_session *session, xen_gpu_group gpu_group, enum xen_allocation_algorithm allocation_algorithm)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = gpu_group },
+            { .type = &xen_allocation_algorithm_abstract_type_,
+              .u.enum_val = allocation_algorithm }
+        };
+
+    xen_call_(session, "GPU_group.set_allocation_algorithm", param_values, 2, NULL, NULL);
+    return session->ok;
+}
+
+
+bool
+xen_gpu_group_create(xen_session *session, xen_gpu_group *result, char *name_label, char *name_description, xen_string_string_map *other_config)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = name_label },
+            { .type = &abstract_type_string,
+              .u.string_val = name_description },
+            { .type = &abstract_type_string_string_map,
+              .u.set_val = (arbitrary_set *)other_config }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("GPU_group.create");
+    return session->ok;
+}
+
+bool
+xen_gpu_group_create_async(xen_session *session, xen_task *result, char *name_label, char *name_description, xen_string_string_map *other_config)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = name_label },
+            { .type = &abstract_type_string,
+              .u.string_val = name_description },
+            { .type = &abstract_type_string_string_map,
+              .u.set_val = (arbitrary_set *)other_config }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.GPU_group.create");
+    return session->ok;
+}
+
+bool
+xen_gpu_group_destroy(xen_session *session, xen_gpu_group self)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self }
+        };
+
+    xen_call_(session, "GPU_group.destroy", param_values, 1, NULL, NULL);
+    return session->ok;
+}
+
+bool
+xen_gpu_group_destroy_async(xen_session *session, xen_task *result, xen_gpu_group self)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.GPU_group.destroy");
+    return session->ok;
+}
+
+bool
+xen_gpu_group_get_remaining_capacity(xen_session *session, int64_t *result, xen_gpu_group self, xen_vgpu_type vgpu_type)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = vgpu_type }
+        };
+
+    abstract_type result_type = abstract_type_int;
+
+    XEN_CALL_("GPU_group.get_remaining_capacity");
+    return session->ok;
+}
+
+bool
+xen_gpu_group_get_remaining_capacity_async(xen_session *session, xen_task *result, xen_gpu_group self, xen_vgpu_type vgpu_type)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = vgpu_type }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.GPU_group.get_remaining_capacity");
+    return session->ok;
+}
 
 bool
 xen_gpu_group_get_all(xen_session *session, struct xen_gpu_group_set **result)

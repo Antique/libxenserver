@@ -1403,14 +1403,18 @@ xen_vdi_update_async(xen_session *session, xen_task *result, xen_vdi vdi)
 }
 
 bool
-xen_vdi_copy(xen_session *session, xen_vdi *result, xen_vdi vdi, xen_sr sr)
+xen_vdi_copy(xen_session *session, xen_vdi *result, xen_vdi vdi, xen_sr sr, xen_vdi base_vdi, xen_vdi into_vdi)
 {
     abstract_value param_values[] =
         {
             { .type = &abstract_type_string,
               .u.string_val = vdi },
             { .type = &abstract_type_string,
-              .u.string_val = sr }
+              .u.string_val = sr },
+            { .type = &abstract_type_string,
+              .u.string_val = base_vdi },
+            { .type = &abstract_type_string,
+              .u.string_val = into_vdi }
         };
 
     abstract_type result_type = abstract_type_string;
@@ -1421,14 +1425,18 @@ xen_vdi_copy(xen_session *session, xen_vdi *result, xen_vdi vdi, xen_sr sr)
 }
 
 bool
-xen_vdi_copy_async(xen_session *session, xen_task *result, xen_vdi vdi, xen_sr sr)
+xen_vdi_copy_async(xen_session *session, xen_task *result, xen_vdi vdi, xen_sr sr, xen_vdi base_vdi, xen_vdi into_vdi)
 {
     abstract_value param_values[] =
         {
             { .type = &abstract_type_string,
               .u.string_val = vdi },
             { .type = &abstract_type_string,
-              .u.string_val = sr }
+              .u.string_val = sr },
+            { .type = &abstract_type_string,
+              .u.string_val = base_vdi },
+            { .type = &abstract_type_string,
+              .u.string_val = into_vdi }
         };
 
     abstract_type result_type = abstract_type_string;

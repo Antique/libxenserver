@@ -37,6 +37,7 @@
 #include "xen_string_vm_appliance_operation_map_internal.h"
 #include "xen_vm_appliance_operation_internal.h"
 #include <xen/api/xen_common.h>
+#include <xen/api/xen_sr.h>
 #include <xen/api/xen_string_vm_appliance_operation_map.h>
 #include <xen/api/xen_vm.h>
 #include <xen/api/xen_vm_appliance.h>
@@ -508,6 +509,42 @@ xen_vm_appliance_assert_can_be_recovered_async(xen_session *session, xen_task *r
 
     *result = NULL;
     XEN_CALL_("Async.VM_appliance.assert_can_be_recovered");
+    return session->ok;
+}
+
+bool
+xen_vm_appliance_get_srs_required_for_recovery(xen_session *session, struct xen_sr_set **result, xen_vm_appliance self, xen_session *session_to)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = session_to->session_id }
+        };
+
+    abstract_type result_type = abstract_type_string_set;
+
+    *result = NULL;
+    XEN_CALL_("VM_appliance.get_SRs_required_for_recovery");
+    return session->ok;
+}
+
+bool
+xen_vm_appliance_get_srs_required_for_recovery_async(xen_session *session, xen_task *result, xen_vm_appliance self, xen_session *session_to)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = session_to->session_id }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.VM_appliance.get_SRs_required_for_recovery");
     return session->ok;
 }
 

@@ -116,6 +116,8 @@ typedef struct xen_pif_record
     struct xen_string_set *ipv6;
     char *ipv6_gateway;
     enum xen_primary_address_type primary_address_type;
+    bool managed;
+    xen_string_string_map *properties;
 } xen_pif_record;
 
 /**
@@ -408,6 +410,20 @@ xen_pif_get_primary_address_type(xen_session *session, enum xen_primary_address_
 
 
 /**
+ * Get the managed field of the given PIF.
+ */
+extern bool
+xen_pif_get_managed(xen_session *session, bool *result, xen_pif pif);
+
+
+/**
+ * Get the properties field of the given PIF.
+ */
+extern bool
+xen_pif_get_properties(xen_session *session, xen_string_string_map **result, xen_pif pif);
+
+
+/**
  * Set the other_config field of the given PIF.
  */
 extern bool
@@ -526,13 +542,13 @@ xen_pif_scan_async(xen_session *session, xen_task *result, xen_host host);
  * Create a PIF object matching a particular network interface.
  */
 extern bool
-xen_pif_introduce(xen_session *session, xen_pif *result, xen_host host, char *mac, char *device);
+xen_pif_introduce(xen_session *session, xen_pif *result, xen_host host, char *mac, char *device, bool managed);
 
 /**
  * Create a PIF object matching a particular network interface.
  */
 extern bool
-xen_pif_introduce_async(xen_session *session, xen_task *result, xen_host host, char *mac, char *device);
+xen_pif_introduce_async(xen_session *session, xen_task *result, xen_host host, char *mac, char *device, bool managed);
 
 
 /**
@@ -578,13 +594,13 @@ xen_pif_plug_async(xen_session *session, xen_task *result, xen_pif self);
  * Create a new PIF record in the database only.
  */
 extern bool
-xen_pif_db_introduce(xen_session *session, xen_pif *result, char *device, xen_network network, xen_host host, char *mac, int64_t mtu, int64_t vlan, bool physical, enum xen_ip_configuration_mode ip_configuration_mode, char *ip, char *netmask, char *gateway, char *dns, xen_bond bond_slave_of, xen_vlan vlan_master_of, bool management, xen_string_string_map *other_config, bool disallow_unplug, enum xen_ipv6_configuration_mode ipv6_configuration_mode, struct xen_string_set *ipv6, char *ipv6_gateway, enum xen_primary_address_type primary_address_type);
+xen_pif_db_introduce(xen_session *session, xen_pif *result, char *device, xen_network network, xen_host host, char *mac, int64_t mtu, int64_t vlan, bool physical, enum xen_ip_configuration_mode ip_configuration_mode, char *ip, char *netmask, char *gateway, char *dns, xen_bond bond_slave_of, xen_vlan vlan_master_of, bool management, xen_string_string_map *other_config, bool disallow_unplug, enum xen_ipv6_configuration_mode ipv6_configuration_mode, struct xen_string_set *ipv6, char *ipv6_gateway, enum xen_primary_address_type primary_address_type, bool managed, xen_string_string_map *properties);
 
 /**
  * Create a new PIF record in the database only.
  */
 extern bool
-xen_pif_db_introduce_async(xen_session *session, xen_task *result, char *device, xen_network network, xen_host host, char *mac, int64_t mtu, int64_t vlan, bool physical, enum xen_ip_configuration_mode ip_configuration_mode, char *ip, char *netmask, char *gateway, char *dns, xen_bond bond_slave_of, xen_vlan vlan_master_of, bool management, xen_string_string_map *other_config, bool disallow_unplug, enum xen_ipv6_configuration_mode ipv6_configuration_mode, struct xen_string_set *ipv6, char *ipv6_gateway, enum xen_primary_address_type primary_address_type);
+xen_pif_db_introduce_async(xen_session *session, xen_task *result, char *device, xen_network network, xen_host host, char *mac, int64_t mtu, int64_t vlan, bool physical, enum xen_ip_configuration_mode ip_configuration_mode, char *ip, char *netmask, char *gateway, char *dns, xen_bond bond_slave_of, xen_vlan vlan_master_of, bool management, xen_string_string_map *other_config, bool disallow_unplug, enum xen_ipv6_configuration_mode ipv6_configuration_mode, struct xen_string_set *ipv6, char *ipv6_gateway, enum xen_primary_address_type primary_address_type, bool managed, xen_string_string_map *properties);
 
 
 /**
@@ -598,6 +614,19 @@ xen_pif_db_forget(xen_session *session, xen_pif self);
  */
 extern bool
 xen_pif_db_forget_async(xen_session *session, xen_task *result, xen_pif self);
+
+
+/**
+ * Set the value of a property of the PIF.
+ */
+extern bool
+xen_pif_set_property(xen_session *session, xen_pif self, char *name, char *value);
+
+/**
+ * Set the value of a property of the PIF.
+ */
+extern bool
+xen_pif_set_property_async(xen_session *session, xen_task *result, xen_pif self, char *name, char *value);
 
 
 /**

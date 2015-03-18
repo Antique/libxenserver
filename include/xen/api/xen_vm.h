@@ -1988,6 +1988,19 @@ xen_vm_assert_can_be_recovered_async(xen_session *session, xen_task *result, xen
 
 
 /**
+ * List all the SR's that are required for the VM to be recovered.
+ */
+extern bool
+xen_vm_get_srs_required_for_recovery(xen_session *session, struct xen_sr_set **result, xen_vm self, xen_session *session_to);
+
+/**
+ * List all the SR's that are required for the VM to be recovered.
+ */
+extern bool
+xen_vm_get_srs_required_for_recovery_async(xen_session *session, xen_task *result, xen_vm self, xen_session *session_to);
+
+
+/**
  * Recover the VM.
  */
 extern bool

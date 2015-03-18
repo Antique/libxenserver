@@ -39,6 +39,10 @@
 #include <xen/api/xen_pgpu_decl.h>
 #include <xen/api/xen_pgpu_xen_pgpu_record_map.h>
 #include <xen/api/xen_string_string_map.h>
+#include <xen/api/xen_task_decl.h>
+#include <xen/api/xen_vgpu_decl.h>
+#include <xen/api/xen_vgpu_type_decl.h>
+#include <xen/api/xen_vgpu_type_int_map.h>
 
 
 /*
@@ -84,6 +88,10 @@ typedef struct xen_pgpu_record
     struct xen_gpu_group_record_opt *gpu_group;
     struct xen_host_record_opt *host;
     xen_string_string_map *other_config;
+    struct xen_vgpu_type_record_opt_set *supported_vgpu_types;
+    struct xen_vgpu_type_record_opt_set *enabled_vgpu_types;
+    struct xen_vgpu_record_opt_set *resident_vgpus;
+    xen_vgpu_type_int_map *supported_vgpu_max_capacities;
 } xen_pgpu_record;
 
 /**
@@ -215,6 +223,34 @@ xen_pgpu_get_other_config(xen_session *session, xen_string_string_map **result, 
 
 
 /**
+ * Get the supported_VGPU_types field of the given PGPU.
+ */
+extern bool
+xen_pgpu_get_supported_vgpu_types(xen_session *session, struct xen_vgpu_type_set **result, xen_pgpu pgpu);
+
+
+/**
+ * Get the enabled_VGPU_types field of the given PGPU.
+ */
+extern bool
+xen_pgpu_get_enabled_vgpu_types(xen_session *session, struct xen_vgpu_type_set **result, xen_pgpu pgpu);
+
+
+/**
+ * Get the resident_VGPUs field of the given PGPU.
+ */
+extern bool
+xen_pgpu_get_resident_vgpus(xen_session *session, struct xen_vgpu_set **result, xen_pgpu pgpu);
+
+
+/**
+ * Get the supported_VGPU_max_capacities field of the given PGPU.
+ */
+extern bool
+xen_pgpu_get_supported_vgpu_max_capacities(xen_session *session, xen_vgpu_type_int_map **result, xen_pgpu pgpu);
+
+
+/**
  * Set the other_config field of the given PGPU.
  */
 extern bool
@@ -236,6 +272,71 @@ xen_pgpu_add_to_other_config(xen_session *session, xen_pgpu pgpu, char *key, cha
  */
 extern bool
 xen_pgpu_remove_from_other_config(xen_session *session, xen_pgpu pgpu, char *key);
+
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_add_enabled_vgpu_types(xen_session *session, xen_pgpu self, xen_vgpu_type value);
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_add_enabled_vgpu_types_async(xen_session *session, xen_task *result, xen_pgpu self, xen_vgpu_type value);
+
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_remove_enabled_vgpu_types(xen_session *session, xen_pgpu self, xen_vgpu_type value);
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_remove_enabled_vgpu_types_async(xen_session *session, xen_task *result, xen_pgpu self, xen_vgpu_type value);
+
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_set_enabled_vgpu_types(xen_session *session, xen_pgpu self, struct xen_vgpu_type_set *value);
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_set_enabled_vgpu_types_async(xen_session *session, xen_task *result, xen_pgpu self, struct xen_vgpu_type_set *value);
+
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_set_gpu_group(xen_session *session, xen_pgpu self, xen_gpu_group value);
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_set_gpu_group_async(xen_session *session, xen_task *result, xen_pgpu self, xen_gpu_group value);
+
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_get_remaining_capacity(xen_session *session, int64_t *result, xen_pgpu self, xen_vgpu_type vgpu_type);
+
+/**
+ * .
+ */
+extern bool
+xen_pgpu_get_remaining_capacity_async(xen_session *session, xen_task *result, xen_pgpu self, xen_vgpu_type vgpu_type);
 
 
 /**

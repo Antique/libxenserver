@@ -114,6 +114,11 @@ enum xen_api_failure
     XEN_API_FAILURE_BOOTLOADER_FAILED,
 
     /**
+     * Could not find bridge required by VM.
+     */
+    XEN_API_FAILURE_BRIDGE_NOT_AVAILABLE,
+
+    /**
      * This PIF is a bond slave and cannot have a tunnel on it.
      */
     XEN_API_FAILURE_CANNOT_ADD_TUNNEL_TO_BOND_SLAVE,
@@ -122,6 +127,12 @@ enum xen_api_failure
      * This PIF is a bond slave and cannot have a VLAN on it.
      */
     XEN_API_FAILURE_CANNOT_ADD_VLAN_TO_BOND_SLAVE,
+
+    /**
+     * This properties of this PIF cannot be changed. Only the
+     * properties of non-bonded physical PIFs, or bond masters can be changed.
+     */
+    XEN_API_FAILURE_CANNOT_CHANGE_PIF_PROPERTIES,
 
     /**
      * Cannot forward messages because the host cannot be
@@ -372,6 +383,11 @@ enum xen_api_failure
      * The value specified is of the wrong type
      */
     XEN_API_FAILURE_FIELD_TYPE_ERROR,
+
+    /**
+     * The GPU group does not contain any PGPUs.
+     */
+    XEN_API_FAILURE_GPU_GROUP_CONTAINS_NO_PGPUS,
 
     /**
      * The GPU group contains active PGPUs and cannot be deleted.
@@ -703,6 +719,12 @@ enum xen_api_failure
     XEN_API_FAILURE_IMPORT_INCOMPATIBLE_VERSION,
 
     /**
+     * These PIFs can not be bonded, because their properties are
+     * different.
+     */
+    XEN_API_FAILURE_INCOMPATIBLE_PIF_PROPERTIES,
+
+    /**
      * The specified interface cannot be used because it has no IP
      * address
      */
@@ -815,14 +837,14 @@ enum xen_api_failure
     XEN_API_FAILURE_LICENSE_CHECKOUT_ERROR,
 
     /**
-     * This host cannot join a pool because it's license does not
-     * support pooling
+     * This host cannot join a pool because its license does not
+     * support pooling.
      */
     XEN_API_FAILURE_LICENSE_DOES_NOT_SUPPORT_POOLING,
 
     /**
      * XHA cannot be enabled because this host's license does not
-     * allow it
+     * allow it.
      */
     XEN_API_FAILURE_LICENSE_DOES_NOT_SUPPORT_XHA,
 
@@ -837,6 +859,11 @@ enum xen_api_failure
      * the new licensing system.
      */
     XEN_API_FAILURE_LICENSE_FILE_DEPRECATED,
+
+    /**
+     * Host and pool have incompatible licenses (editions).
+     */
+    XEN_API_FAILURE_LICENSE_HOST_POOL_MISMATCH,
 
     /**
      * There was an error processing your license.  Please contact
@@ -1070,6 +1097,21 @@ enum xen_api_failure
     XEN_API_FAILURE_PERMISSION_DENIED,
 
     /**
+     * There is insufficient capacity on this PGPU to run the VGPU.
+     */
+    XEN_API_FAILURE_PGPU_INSUFFICIENT_CAPACITY_FOR_VGPU,
+
+    /**
+     * This PGPU is currently in use by running VMs.
+     */
+    XEN_API_FAILURE_PGPU_IN_USE_BY_VM,
+
+    /**
+     * PGPU type not compatible with destination group.
+     */
+    XEN_API_FAILURE_PGPU_NOT_COMPATIBLE_WITH_GPU_GROUP,
+
+    /**
      * This operation cannot be performed because the pif is
      * bonded.
      */
@@ -1141,6 +1183,12 @@ enum xen_api_failure
      * interface.
      */
     XEN_API_FAILURE_PIF_TUNNEL_STILL_EXISTS,
+
+    /**
+     * The operation you requested cannot be performed because the
+     * specified PIF is not managed by xapi.
+     */
+    XEN_API_FAILURE_PIF_UNMANAGED,
 
     /**
      * You tried to create a PIF, but it already exists.
@@ -1358,6 +1406,16 @@ enum xen_api_failure
      * was set on it.
      */
     XEN_API_FAILURE_SR_INDESTRUCTIBLE,
+
+    /**
+     * The SR is currently being used as a local cache SR.
+     */
+    XEN_API_FAILURE_SR_IS_CACHE_SR,
+
+    /**
+     * The SR is not attached.
+     */
+    XEN_API_FAILURE_SR_NOT_ATTACHED,
 
     /**
      * The SR operation cannot be performed because the SR is not
@@ -1585,10 +1643,40 @@ enum xen_api_failure
     XEN_API_FAILURE_VDI_NOT_MANAGED,
 
     /**
+     * The VDI is not stored using a sparse format. It is not
+     * possible to query and manipulate only the changed blocks (or 'block
+     * differences' or 'disk deltas') between two VDIs. Please select a VDI which
+     * uses a sparse-aware technology such as VHD.
+     */
+    XEN_API_FAILURE_VDI_NOT_SPARSE,
+
+    /**
      * The operation required write access but this VDI is
      * read-only
      */
     XEN_API_FAILURE_VDI_READONLY,
+
+    /**
+     * The VDI is too small. Please resize it to at least the
+     * minimum size.
+     */
+    XEN_API_FAILURE_VDI_TOO_SMALL,
+
+    /**
+     * VGPU type is not compatible with one or more of the VGPU
+     * types currently running on this PGPU
+     */
+    XEN_API_FAILURE_VGPU_TYPE_NOT_COMPATIBLE_WITH_RUNNING_TYPE,
+
+    /**
+     * VGPU type is not one of the PGPU's enabled types.
+     */
+    XEN_API_FAILURE_VGPU_TYPE_NOT_ENABLED,
+
+    /**
+     * VGPU type is not one of the PGPU's supported types.
+     */
+    XEN_API_FAILURE_VGPU_TYPE_NOT_SUPPORTED,
 
     /**
      * Network has active VIFs
@@ -1698,6 +1786,12 @@ enum xen_api_failure
     XEN_API_FAILURE_VM_HAS_TOO_MANY_SNAPSHOTS,
 
     /**
+     * This operation could not be performed, because the VM has
+     * one or more virtual GPUs.
+     */
+    XEN_API_FAILURE_VM_HAS_VGPU,
+
+    /**
      * This VM operation cannot be performed on an older-versioned
      * host during an upgrade.
      */
@@ -1729,6 +1823,24 @@ enum xen_api_failure
      * The operation attempted is not valid for a template VM
      */
     XEN_API_FAILURE_VM_IS_TEMPLATE,
+
+    /**
+     * You attempted an operation which needs the cooperative
+     * shutdown feature on a VM which lacks it.
+     */
+    XEN_API_FAILURE_VM_LACKS_FEATURE_SHUTDOWN,
+
+    /**
+     * You attempted an operation which needs the VM cooperative
+     * suspend feature on a VM which lacks it.
+     */
+    XEN_API_FAILURE_VM_LACKS_FEATURE_SUSPEND,
+
+    /**
+     * You attempted an operation which needs the VM hotplug-vcpu
+     * feature on a VM which lacks it.
+     */
+    XEN_API_FAILURE_VM_LACKS_FEATURE_VCPU_HOTPLUG,
 
     /**
      * The specified VM has too little memory to be started.
@@ -1810,6 +1922,13 @@ enum xen_api_failure
      * be attached
      */
     XEN_API_FAILURE_VM_REQUIRES_VDI,
+
+    /**
+     * You attempted to run a VM on a host on which the vGPU
+     * required by the VM cannot be allocated on any pGPUs in the GPU_group needed
+     * by the VM.
+     */
+    XEN_API_FAILURE_VM_REQUIRES_VGPU,
 
     /**
      * An error occured while reverting the specified virtual

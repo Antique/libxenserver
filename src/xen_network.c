@@ -47,6 +47,7 @@
 #include <xen/api/xen_string_network_operations_map.h>
 #include <xen/api/xen_string_string_map.h>
 #include <xen/api/xen_vif.h>
+#include <xen/api/xen_vif_string_map.h>
 
 
 XEN_FREE(xen_network)
@@ -98,7 +99,10 @@ static const struct_member xen_network_record_struct_members[] =
           .offset = offsetof(xen_network_record, tags) },
         { .key = "default_locking_mode",
           .type = &xen_network_default_locking_mode_abstract_type_,
-          .offset = offsetof(xen_network_record, default_locking_mode) }
+          .offset = offsetof(xen_network_record, default_locking_mode) },
+        { .key = "assigned_ips",
+          .type = &abstract_type_string_string_map,
+          .offset = offsetof(xen_network_record, assigned_ips) }
     };
 
 const abstract_type xen_network_record_abstract_type_ =
@@ -150,6 +154,7 @@ xen_network_record_free(xen_network_record *record)
     free(record->bridge);
     xen_string_blob_map_free(record->blobs);
     xen_string_set_free(record->tags);
+    xen_vif_string_map_free(record->assigned_ips);
     free(record);
 }
 
@@ -469,6 +474,23 @@ xen_network_get_default_locking_mode(xen_session *session, enum xen_network_defa
 
     abstract_type result_type = xen_network_default_locking_mode_abstract_type_;
     XEN_CALL_("network.get_default_locking_mode");
+    return session->ok;
+}
+
+
+bool
+xen_network_get_assigned_ips(xen_session *session, xen_vif_string_map **result, xen_network network)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = network }
+        };
+
+    abstract_type result_type = abstract_type_string_string_map;
+
+    *result = NULL;
+    XEN_CALL_("network.get_assigned_ips");
     return session->ok;
 }
 

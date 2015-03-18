@@ -32,13 +32,16 @@
 #ifndef XEN_GPU_GROUP_H
 #define XEN_GPU_GROUP_H
 
+#include <xen/api/xen_allocation_algorithm.h>
 #include <xen/api/xen_common.h>
 #include <xen/api/xen_gpu_group_decl.h>
 #include <xen/api/xen_gpu_group_xen_gpu_group_record_map.h>
 #include <xen/api/xen_pgpu_decl.h>
 #include <xen/api/xen_string_set.h>
 #include <xen/api/xen_string_string_map.h>
+#include <xen/api/xen_task_decl.h>
 #include <xen/api/xen_vgpu_decl.h>
+#include <xen/api/xen_vgpu_type_decl.h>
 
 
 /*
@@ -86,6 +89,9 @@ typedef struct xen_gpu_group_record
     struct xen_vgpu_record_opt_set *vgpus;
     struct xen_string_set *gpu_types;
     xen_string_string_map *other_config;
+    enum xen_allocation_algorithm allocation_algorithm;
+    struct xen_vgpu_type_record_opt_set *supported_vgpu_types;
+    struct xen_vgpu_type_record_opt_set *enabled_vgpu_types;
 } xen_gpu_group_record;
 
 /**
@@ -238,6 +244,27 @@ xen_gpu_group_get_other_config(xen_session *session, xen_string_string_map **res
 
 
 /**
+ * Get the allocation_algorithm field of the given GPU_group.
+ */
+extern bool
+xen_gpu_group_get_allocation_algorithm(xen_session *session, enum xen_allocation_algorithm *result, xen_gpu_group gpu_group);
+
+
+/**
+ * Get the supported_VGPU_types field of the given GPU_group.
+ */
+extern bool
+xen_gpu_group_get_supported_vgpu_types(xen_session *session, struct xen_vgpu_type_set **result, xen_gpu_group gpu_group);
+
+
+/**
+ * Get the enabled_VGPU_types field of the given GPU_group.
+ */
+extern bool
+xen_gpu_group_get_enabled_vgpu_types(xen_session *session, struct xen_vgpu_type_set **result, xen_gpu_group gpu_group);
+
+
+/**
  * Set the name/label field of the given GPU_group.
  */
 extern bool
@@ -273,6 +300,52 @@ xen_gpu_group_add_to_other_config(xen_session *session, xen_gpu_group gpu_group,
  */
 extern bool
 xen_gpu_group_remove_from_other_config(xen_session *session, xen_gpu_group gpu_group, char *key);
+
+
+/**
+ * Set the allocation_algorithm field of the given GPU_group.
+ */
+extern bool
+xen_gpu_group_set_allocation_algorithm(xen_session *session, xen_gpu_group gpu_group, enum xen_allocation_algorithm allocation_algorithm);
+
+
+/**
+ * .
+ */
+extern bool
+xen_gpu_group_create(xen_session *session, xen_gpu_group *result, char *name_label, char *name_description, xen_string_string_map *other_config);
+
+/**
+ * .
+ */
+extern bool
+xen_gpu_group_create_async(xen_session *session, xen_task *result, char *name_label, char *name_description, xen_string_string_map *other_config);
+
+
+/**
+ * .
+ */
+extern bool
+xen_gpu_group_destroy(xen_session *session, xen_gpu_group self);
+
+/**
+ * .
+ */
+extern bool
+xen_gpu_group_destroy_async(xen_session *session, xen_task *result, xen_gpu_group self);
+
+
+/**
+ * .
+ */
+extern bool
+xen_gpu_group_get_remaining_capacity(xen_session *session, int64_t *result, xen_gpu_group self, xen_vgpu_type vgpu_type);
+
+/**
+ * .
+ */
+extern bool
+xen_gpu_group_get_remaining_capacity_async(xen_session *session, xen_task *result, xen_gpu_group self, xen_vgpu_type vgpu_type);
 
 
 /**

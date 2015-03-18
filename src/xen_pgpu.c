@@ -41,6 +41,9 @@
 #include <xen/api/xen_pgpu.h>
 #include <xen/api/xen_pgpu_xen_pgpu_record_map.h>
 #include <xen/api/xen_string_string_map.h>
+#include <xen/api/xen_vgpu.h>
+#include <xen/api/xen_vgpu_type.h>
+#include <xen/api/xen_vgpu_type_int_map.h>
 
 
 XEN_FREE(xen_pgpu)
@@ -68,7 +71,19 @@ static const struct_member xen_pgpu_record_struct_members[] =
           .offset = offsetof(xen_pgpu_record, host) },
         { .key = "other_config",
           .type = &abstract_type_string_string_map,
-          .offset = offsetof(xen_pgpu_record, other_config) }
+          .offset = offsetof(xen_pgpu_record, other_config) },
+        { .key = "supported_VGPU_types",
+          .type = &abstract_type_ref_set,
+          .offset = offsetof(xen_pgpu_record, supported_vgpu_types) },
+        { .key = "enabled_VGPU_types",
+          .type = &abstract_type_ref_set,
+          .offset = offsetof(xen_pgpu_record, enabled_vgpu_types) },
+        { .key = "resident_VGPUs",
+          .type = &abstract_type_ref_set,
+          .offset = offsetof(xen_pgpu_record, resident_vgpus) },
+        { .key = "supported_VGPU_max_capacities",
+          .type = &abstract_type_string_int_map,
+          .offset = offsetof(xen_pgpu_record, supported_vgpu_max_capacities) }
     };
 
 const abstract_type xen_pgpu_record_abstract_type_ =
@@ -114,6 +129,10 @@ xen_pgpu_record_free(xen_pgpu_record *record)
     xen_gpu_group_record_opt_free(record->gpu_group);
     xen_host_record_opt_free(record->host);
     xen_string_string_map_free(record->other_config);
+    xen_vgpu_type_record_opt_set_free(record->supported_vgpu_types);
+    xen_vgpu_type_record_opt_set_free(record->enabled_vgpu_types);
+    xen_vgpu_record_opt_set_free(record->resident_vgpus);
+    xen_vgpu_type_int_map_free(record->supported_vgpu_max_capacities);
     free(record);
 }
 
@@ -227,6 +246,74 @@ xen_pgpu_get_other_config(xen_session *session, xen_string_string_map **result, 
 
 
 bool
+xen_pgpu_get_supported_vgpu_types(xen_session *session, struct xen_vgpu_type_set **result, xen_pgpu pgpu)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = pgpu }
+        };
+
+    abstract_type result_type = abstract_type_string_set;
+
+    *result = NULL;
+    XEN_CALL_("PGPU.get_supported_VGPU_types");
+    return session->ok;
+}
+
+
+bool
+xen_pgpu_get_enabled_vgpu_types(xen_session *session, struct xen_vgpu_type_set **result, xen_pgpu pgpu)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = pgpu }
+        };
+
+    abstract_type result_type = abstract_type_string_set;
+
+    *result = NULL;
+    XEN_CALL_("PGPU.get_enabled_VGPU_types");
+    return session->ok;
+}
+
+
+bool
+xen_pgpu_get_resident_vgpus(xen_session *session, struct xen_vgpu_set **result, xen_pgpu pgpu)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = pgpu }
+        };
+
+    abstract_type result_type = abstract_type_string_set;
+
+    *result = NULL;
+    XEN_CALL_("PGPU.get_resident_VGPUs");
+    return session->ok;
+}
+
+
+bool
+xen_pgpu_get_supported_vgpu_max_capacities(xen_session *session, xen_vgpu_type_int_map **result, xen_pgpu pgpu)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = pgpu }
+        };
+
+    abstract_type result_type = abstract_type_string_int_map;
+
+    *result = NULL;
+    XEN_CALL_("PGPU.get_supported_VGPU_max_capacities");
+    return session->ok;
+}
+
+
+bool
 xen_pgpu_set_other_config(xen_session *session, xen_pgpu pgpu, xen_string_string_map *other_config)
 {
     abstract_value param_values[] =
@@ -275,6 +362,173 @@ xen_pgpu_remove_from_other_config(xen_session *session, xen_pgpu pgpu, char *key
     return session->ok;
 }
 
+
+bool
+xen_pgpu_add_enabled_vgpu_types(xen_session *session, xen_pgpu self, xen_vgpu_type value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = value }
+        };
+
+    xen_call_(session, "PGPU.add_enabled_VGPU_types", param_values, 2, NULL, NULL);
+    return session->ok;
+}
+
+bool
+xen_pgpu_add_enabled_vgpu_types_async(xen_session *session, xen_task *result, xen_pgpu self, xen_vgpu_type value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = value }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.PGPU.add_enabled_VGPU_types");
+    return session->ok;
+}
+
+bool
+xen_pgpu_remove_enabled_vgpu_types(xen_session *session, xen_pgpu self, xen_vgpu_type value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = value }
+        };
+
+    xen_call_(session, "PGPU.remove_enabled_VGPU_types", param_values, 2, NULL, NULL);
+    return session->ok;
+}
+
+bool
+xen_pgpu_remove_enabled_vgpu_types_async(xen_session *session, xen_task *result, xen_pgpu self, xen_vgpu_type value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = value }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.PGPU.remove_enabled_VGPU_types");
+    return session->ok;
+}
+
+bool
+xen_pgpu_set_enabled_vgpu_types(xen_session *session, xen_pgpu self, struct xen_vgpu_type_set *value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string_set,
+              .u.set_val = (arbitrary_set *)value }
+        };
+
+    xen_call_(session, "PGPU.set_enabled_VGPU_types", param_values, 2, NULL, NULL);
+    return session->ok;
+}
+
+bool
+xen_pgpu_set_enabled_vgpu_types_async(xen_session *session, xen_task *result, xen_pgpu self, struct xen_vgpu_type_set *value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string_set,
+              .u.set_val = (arbitrary_set *)value }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.PGPU.set_enabled_VGPU_types");
+    return session->ok;
+}
+
+bool
+xen_pgpu_set_gpu_group(xen_session *session, xen_pgpu self, xen_gpu_group value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = value }
+        };
+
+    xen_call_(session, "PGPU.set_GPU_group", param_values, 2, NULL, NULL);
+    return session->ok;
+}
+
+bool
+xen_pgpu_set_gpu_group_async(xen_session *session, xen_task *result, xen_pgpu self, xen_gpu_group value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = value }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.PGPU.set_GPU_group");
+    return session->ok;
+}
+
+bool
+xen_pgpu_get_remaining_capacity(xen_session *session, int64_t *result, xen_pgpu self, xen_vgpu_type vgpu_type)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = vgpu_type }
+        };
+
+    abstract_type result_type = abstract_type_int;
+
+    XEN_CALL_("PGPU.get_remaining_capacity");
+    return session->ok;
+}
+
+bool
+xen_pgpu_get_remaining_capacity_async(xen_session *session, xen_task *result, xen_pgpu self, xen_vgpu_type vgpu_type)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = vgpu_type }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.PGPU.get_remaining_capacity");
+    return session->ok;
+}
 
 bool
 xen_pgpu_get_all(xen_session *session, struct xen_pgpu_set **result)

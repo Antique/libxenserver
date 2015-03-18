@@ -34,9 +34,11 @@
 
 #include <xen/api/xen_common.h>
 #include <xen/api/xen_gpu_group_decl.h>
+#include <xen/api/xen_pgpu_decl.h>
 #include <xen/api/xen_string_string_map.h>
 #include <xen/api/xen_task_decl.h>
 #include <xen/api/xen_vgpu_decl.h>
+#include <xen/api/xen_vgpu_type_decl.h>
 #include <xen/api/xen_vgpu_xen_vgpu_record_map.h>
 #include <xen/api/xen_vm_decl.h>
 
@@ -85,6 +87,8 @@ typedef struct xen_vgpu_record
     char *device;
     bool currently_attached;
     xen_string_string_map *other_config;
+    struct xen_vgpu_type_record_opt *type;
+    struct xen_pgpu_record_opt *resident_on;
 } xen_vgpu_record;
 
 /**
@@ -223,6 +227,20 @@ xen_vgpu_get_other_config(xen_session *session, xen_string_string_map **result, 
 
 
 /**
+ * Get the type field of the given VGPU.
+ */
+extern bool
+xen_vgpu_get_type(xen_session *session, xen_vgpu_type *result, xen_vgpu vgpu);
+
+
+/**
+ * Get the resident_on field of the given VGPU.
+ */
+extern bool
+xen_vgpu_get_resident_on(xen_session *session, xen_pgpu *result, xen_vgpu vgpu);
+
+
+/**
  * Set the other_config field of the given VGPU.
  */
 extern bool
@@ -250,13 +268,13 @@ xen_vgpu_remove_from_other_config(xen_session *session, xen_vgpu vgpu, char *key
  * .
  */
 extern bool
-xen_vgpu_create(xen_session *session, xen_vgpu *result, xen_vm vm, xen_gpu_group gpu_group, char *device, xen_string_string_map *other_config);
+xen_vgpu_create(xen_session *session, xen_vgpu *result, xen_vm vm, xen_gpu_group gpu_group, char *device, xen_string_string_map *other_config, xen_vgpu_type type);
 
 /**
  * .
  */
 extern bool
-xen_vgpu_create_async(xen_session *session, xen_task *result, xen_vm vm, xen_gpu_group gpu_group, char *device, xen_string_string_map *other_config);
+xen_vgpu_create_async(xen_session *session, xen_task *result, xen_vm vm, xen_gpu_group gpu_group, char *device, xen_string_string_map *other_config, xen_vgpu_type type);
 
 
 /**

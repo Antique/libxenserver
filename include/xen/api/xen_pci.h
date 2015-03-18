@@ -85,6 +85,8 @@ typedef struct xen_pci_record
     char *pci_id;
     struct xen_pci_record_opt_set *dependencies;
     xen_string_string_map *other_config;
+    char *subsystem_vendor_name;
+    char *subsystem_device_name;
 } xen_pci_record;
 
 /**
@@ -234,6 +236,20 @@ xen_pci_get_dependencies(xen_session *session, struct xen_pci_set **result, xen_
  */
 extern bool
 xen_pci_get_other_config(xen_session *session, xen_string_string_map **result, xen_pci pci);
+
+
+/**
+ * Get the subsystem_vendor_name field of the given PCI.
+ */
+extern bool
+xen_pci_get_subsystem_vendor_name(xen_session *session, char **result, xen_pci pci);
+
+
+/**
+ * Get the subsystem_device_name field of the given PCI.
+ */
+extern bool
+xen_pci_get_subsystem_device_name(xen_session *session, char **result, xen_pci pci);
 
 
 /**

@@ -143,7 +143,13 @@ static const struct_member xen_pif_record_struct_members[] =
           .offset = offsetof(xen_pif_record, ipv6_gateway) },
         { .key = "primary_address_type",
           .type = &xen_primary_address_type_abstract_type_,
-          .offset = offsetof(xen_pif_record, primary_address_type) }
+          .offset = offsetof(xen_pif_record, primary_address_type) },
+        { .key = "managed",
+          .type = &abstract_type_bool,
+          .offset = offsetof(xen_pif_record, managed) },
+        { .key = "properties",
+          .type = &abstract_type_string_string_map,
+          .offset = offsetof(xen_pif_record, properties) }
     };
 
 const abstract_type xen_pif_record_abstract_type_ =
@@ -203,6 +209,7 @@ xen_pif_record_free(xen_pif_record *record)
     xen_tunnel_record_opt_set_free(record->tunnel_transport_pif_of);
     xen_string_set_free(record->ipv6);
     free(record->ipv6_gateway);
+    xen_string_string_map_free(record->properties);
     free(record);
 }
 
@@ -695,6 +702,39 @@ xen_pif_get_primary_address_type(xen_session *session, enum xen_primary_address_
 
 
 bool
+xen_pif_get_managed(xen_session *session, bool *result, xen_pif pif)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = pif }
+        };
+
+    abstract_type result_type = abstract_type_bool;
+
+    XEN_CALL_("PIF.get_managed");
+    return session->ok;
+}
+
+
+bool
+xen_pif_get_properties(xen_session *session, xen_string_string_map **result, xen_pif pif)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = pif }
+        };
+
+    abstract_type result_type = abstract_type_string_string_map;
+
+    *result = NULL;
+    XEN_CALL_("PIF.get_properties");
+    return session->ok;
+}
+
+
+bool
 xen_pif_set_other_config(xen_session *session, xen_pif pif, xen_string_string_map *other_config)
 {
     abstract_value param_values[] =
@@ -990,7 +1030,7 @@ xen_pif_scan_async(xen_session *session, xen_task *result, xen_host host)
 }
 
 bool
-xen_pif_introduce(xen_session *session, xen_pif *result, xen_host host, char *mac, char *device)
+xen_pif_introduce(xen_session *session, xen_pif *result, xen_host host, char *mac, char *device, bool managed)
 {
     abstract_value param_values[] =
         {
@@ -999,7 +1039,9 @@ xen_pif_introduce(xen_session *session, xen_pif *result, xen_host host, char *ma
             { .type = &abstract_type_string,
               .u.string_val = mac },
             { .type = &abstract_type_string,
-              .u.string_val = device }
+              .u.string_val = device },
+            { .type = &abstract_type_bool,
+              .u.bool_val = managed }
         };
 
     abstract_type result_type = abstract_type_string;
@@ -1010,7 +1052,7 @@ xen_pif_introduce(xen_session *session, xen_pif *result, xen_host host, char *ma
 }
 
 bool
-xen_pif_introduce_async(xen_session *session, xen_task *result, xen_host host, char *mac, char *device)
+xen_pif_introduce_async(xen_session *session, xen_task *result, xen_host host, char *mac, char *device, bool managed)
 {
     abstract_value param_values[] =
         {
@@ -1019,7 +1061,9 @@ xen_pif_introduce_async(xen_session *session, xen_task *result, xen_host host, c
             { .type = &abstract_type_string,
               .u.string_val = mac },
             { .type = &abstract_type_string,
-              .u.string_val = device }
+              .u.string_val = device },
+            { .type = &abstract_type_bool,
+              .u.bool_val = managed }
         };
 
     abstract_type result_type = abstract_type_string;
@@ -1117,7 +1161,7 @@ xen_pif_plug_async(xen_session *session, xen_task *result, xen_pif self)
 }
 
 bool
-xen_pif_db_introduce(xen_session *session, xen_pif *result, char *device, xen_network network, xen_host host, char *mac, int64_t mtu, int64_t vlan, bool physical, enum xen_ip_configuration_mode ip_configuration_mode, char *ip, char *netmask, char *gateway, char *dns, xen_bond bond_slave_of, xen_vlan vlan_master_of, bool management, xen_string_string_map *other_config, bool disallow_unplug, enum xen_ipv6_configuration_mode ipv6_configuration_mode, struct xen_string_set *ipv6, char *ipv6_gateway, enum xen_primary_address_type primary_address_type)
+xen_pif_db_introduce(xen_session *session, xen_pif *result, char *device, xen_network network, xen_host host, char *mac, int64_t mtu, int64_t vlan, bool physical, enum xen_ip_configuration_mode ip_configuration_mode, char *ip, char *netmask, char *gateway, char *dns, xen_bond bond_slave_of, xen_vlan vlan_master_of, bool management, xen_string_string_map *other_config, bool disallow_unplug, enum xen_ipv6_configuration_mode ipv6_configuration_mode, struct xen_string_set *ipv6, char *ipv6_gateway, enum xen_primary_address_type primary_address_type, bool managed, xen_string_string_map *properties)
 {
     abstract_value param_values[] =
         {
@@ -1162,7 +1206,11 @@ xen_pif_db_introduce(xen_session *session, xen_pif *result, char *device, xen_ne
             { .type = &abstract_type_string,
               .u.string_val = ipv6_gateway },
             { .type = &xen_primary_address_type_abstract_type_,
-              .u.enum_val = primary_address_type }
+              .u.enum_val = primary_address_type },
+            { .type = &abstract_type_bool,
+              .u.bool_val = managed },
+            { .type = &abstract_type_string_string_map,
+              .u.set_val = (arbitrary_set *)properties }
         };
 
     abstract_type result_type = abstract_type_string;
@@ -1173,7 +1221,7 @@ xen_pif_db_introduce(xen_session *session, xen_pif *result, char *device, xen_ne
 }
 
 bool
-xen_pif_db_introduce_async(xen_session *session, xen_task *result, char *device, xen_network network, xen_host host, char *mac, int64_t mtu, int64_t vlan, bool physical, enum xen_ip_configuration_mode ip_configuration_mode, char *ip, char *netmask, char *gateway, char *dns, xen_bond bond_slave_of, xen_vlan vlan_master_of, bool management, xen_string_string_map *other_config, bool disallow_unplug, enum xen_ipv6_configuration_mode ipv6_configuration_mode, struct xen_string_set *ipv6, char *ipv6_gateway, enum xen_primary_address_type primary_address_type)
+xen_pif_db_introduce_async(xen_session *session, xen_task *result, char *device, xen_network network, xen_host host, char *mac, int64_t mtu, int64_t vlan, bool physical, enum xen_ip_configuration_mode ip_configuration_mode, char *ip, char *netmask, char *gateway, char *dns, xen_bond bond_slave_of, xen_vlan vlan_master_of, bool management, xen_string_string_map *other_config, bool disallow_unplug, enum xen_ipv6_configuration_mode ipv6_configuration_mode, struct xen_string_set *ipv6, char *ipv6_gateway, enum xen_primary_address_type primary_address_type, bool managed, xen_string_string_map *properties)
 {
     abstract_value param_values[] =
         {
@@ -1218,7 +1266,11 @@ xen_pif_db_introduce_async(xen_session *session, xen_task *result, char *device,
             { .type = &abstract_type_string,
               .u.string_val = ipv6_gateway },
             { .type = &xen_primary_address_type_abstract_type_,
-              .u.enum_val = primary_address_type }
+              .u.enum_val = primary_address_type },
+            { .type = &abstract_type_bool,
+              .u.bool_val = managed },
+            { .type = &abstract_type_string_string_map,
+              .u.set_val = (arbitrary_set *)properties }
         };
 
     abstract_type result_type = abstract_type_string;
@@ -1254,6 +1306,43 @@ xen_pif_db_forget_async(xen_session *session, xen_task *result, xen_pif self)
 
     *result = NULL;
     XEN_CALL_("Async.PIF.db_forget");
+    return session->ok;
+}
+
+bool
+xen_pif_set_property(xen_session *session, xen_pif self, char *name, char *value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = name },
+            { .type = &abstract_type_string,
+              .u.string_val = value }
+        };
+
+    xen_call_(session, "PIF.set_property", param_values, 3, NULL, NULL);
+    return session->ok;
+}
+
+bool
+xen_pif_set_property_async(xen_session *session, xen_task *result, xen_pif self, char *name, char *value)
+{
+    abstract_value param_values[] =
+        {
+            { .type = &abstract_type_string,
+              .u.string_val = self },
+            { .type = &abstract_type_string,
+              .u.string_val = name },
+            { .type = &abstract_type_string,
+              .u.string_val = value }
+        };
+
+    abstract_type result_type = abstract_type_string;
+
+    *result = NULL;
+    XEN_CALL_("Async.PIF.set_property");
     return session->ok;
 }
 

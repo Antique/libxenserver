@@ -42,6 +42,7 @@
 static const char *lookup_table[] =
 {
     "cancel",
+    "destroy",
     "undefined"
 };
 
